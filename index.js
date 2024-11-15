@@ -14,6 +14,9 @@ app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 
 
+console.log("men Akmalman");
+
+
 connectDB();
 
 console.log("men Muhammadaliman");
