@@ -5,6 +5,7 @@ const connectDB = require("./db/config.db");
 const bookRouter = require("./router/books.routes");
 const cookieParser = require("cookie-parser");
 const authorRouter = require("./router/author.routes");
+const authRouter = require("./router/auth.routes");
 
 const app = express();
 
@@ -13,18 +14,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 
-
-console.log("men Akmalman");
-
-
 connectDB();
-
-console.log("men Muhammadaliman");
-
 
 /////////////////////// router
 app.use(bookRouter);
 app.use(authorRouter)
+app.use(authRouter)
 
 app.listen(PORT, () => {
   console.log("running: " + PORT);
