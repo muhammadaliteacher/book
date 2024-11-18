@@ -13,7 +13,7 @@ const register = async (req, res, next) => {
     const foundedUser = await AuthSchema.findOne({ email: email })
 
     if (foundedUser) {
-      res.json({
+     return res.json({
         message: "User already exists"
       })
     }
@@ -37,11 +37,11 @@ const register = async (req, res, next) => {
 
     await transpoter.sendMail(sendEmail, (error, info) => {
       if (error) {
-        res.json({
+       return res.json({
           message: error.message
         })
       } else {
-        res.json({
+       return res.json({
           message: info.response
         })
       }
@@ -73,7 +73,7 @@ const verify = async (req, res, next) => {
     const foundedUser = await AuthSchema.findOne({ email: email })
 
     if (!foundedUser) {
-      res.json({
+     return res.json({
         message: "User not found"
       })
     }
@@ -81,12 +81,12 @@ const verify = async (req, res, next) => {
     if (foundedUser.verify_code === verify_code_by_client) {
       await AuthSchema.findByIdAndUpdate(foundedUser._id, { verify: true, verfy_code: "" })
 
-      res.json({
+     return res.json({
         message: "Successfully verified",
       })
 
     } else {
-      res.json({
+     return res.json({
         message: "Verify code mistake or not exists"
       })
     }
@@ -103,7 +103,7 @@ const login = async (req, res, next) => {
     const foundedUser = await AuthSchema.findOne({ email: email })
 
     if (!foundedUser) {
-      res.json({
+     return res.json({
         message: "User not found"
       })
     }
@@ -111,7 +111,7 @@ const login = async (req, res, next) => {
     const checkerPassword = await bcrypt.compare(password, foundedUser.password)
 
     if(!checkerPassword) {
-      res.json({
+     return res.json({
         message: "Invalid password"
       })
     }
@@ -128,14 +128,14 @@ const login = async (req, res, next) => {
       res.cookie("accessToken", accessToken, {httpOnly: true, maxAge: process.env.COOKIE_ACCESS_TIME})
       res.cookie("refreshToken", refreshToken, {httpOnly: true, maxAge: process.env.COOKIE_REFRESH_TIME})
 
-      res.json({
+     return res.json({
         message: "Successfully",
         tokens: {
           accessToken
         }
       })
     }else{
-      res.json({
+     return res.json({
         message: "You were not verified"
       })
     }
