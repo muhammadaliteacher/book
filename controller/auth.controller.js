@@ -2,6 +2,7 @@ const AuthSchema = require("../schemas/auth.schema")
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const {generateAccessToken, generateRefreshToken} = require("../utils/token.generate")
 
 require("dotenv").config()
 
@@ -78,14 +79,10 @@ const verify = async (req, res, next) => {
     }
 
     if (foundedUser.verify_code === verify_code_by_client) {
-      await AuthSchema.findByIdAndUpdate(foundedUser._id, { verify: true })
-
-      const token = jwt.sign({ email: foundedUser.email, role: foundedUser.role, id: foundedUser._id },
-        process.env.SEKRET_KEY, { expiresIn: process.env.JWT_TIME })
+      await AuthSchema.findByIdAndUpdate(foundedUser._id, { verify: true, verfy_code: "" })
 
       res.json({
         message: "Successfully verified",
-        token
       })
 
     } else {
@@ -120,20 +117,28 @@ const login = async (req, res, next) => {
     }
 
     if(foundedUser.verify === true) {
-      const token = jwt.sign({ email: foundedUser.email, role: foundedUser.role, id: foundedUser._id },
-        process.env.SEKRET_KEY, { expiresIn: process.env.JWT_TIME })
+      const accessToken = generateAccessToken({id: foundedUser._id, role: foundedUser.role,
+        email: foundedUser.email
+      })
+
+      const refreshToken = generateRefreshToken({id: foundedUser._id, email: foundedUser.email,
+        role: foundedUser.role
+      })
+
+      res.cookie("accessToken", accessToken, {httpOnly: true, maxAge: process.env.COOKIE_ACCESS_TIME})
+      res.cookie("refreshToken", refreshToken, {httpOnly: true, maxAge: process.env.COOKIE_REFRESH_TIME})
 
       res.json({
         message: "Successfully",
-        token
+        tokens: {
+          accessToken
+        }
       })
     }else{
       res.json({
         message: "You were not verified"
       })
     }
-
-
   }catch(error) {
     next(error)
   }
