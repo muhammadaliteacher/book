@@ -1,8 +1,8 @@
 const AuthSchema = require("../schemas/auth.schema")
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken")
 const {generateAccessToken, generateRefreshToken} = require("../utils/token.generate")
+const BaseError = require("../utils/base_error")
 
 require("dotenv").config()
 
@@ -13,9 +13,7 @@ const register = async (req, res, next) => {
     const foundedUser = await AuthSchema.findOne({ email: email })
 
     if (foundedUser) {
-     return res.json({
-        message: "User already exists"
-      })
+        throw BaseError.BadRequest("User already exists")
     }
 
     const transpoter = nodemailer.createTransport({
@@ -73,9 +71,7 @@ const verify = async (req, res, next) => {
     const foundedUser = await AuthSchema.findOne({ email: email })
 
     if (!foundedUser) {
-     return res.json({
-        message: "User not found"
-      })
+      throw BaseError.BadRequest("User not found")
     }
 
     if (foundedUser.verify_code === verify_code_by_client) {
@@ -86,9 +82,7 @@ const verify = async (req, res, next) => {
       })
 
     } else {
-     return res.json({
-        message: "Verify code mistake or not exists"
-      })
+      throw BaseError.BadRequest("Verify code mistake or not exists")
     }
 
   } catch (error) {
@@ -103,17 +97,13 @@ const login = async (req, res, next) => {
     const foundedUser = await AuthSchema.findOne({ email: email })
 
     if (!foundedUser) {
-     return res.json({
-        message: "User not found"
-      })
+      throw BaseError.BadRequest("User not found")
     }
 
     const checkerPassword = await bcrypt.compare(password, foundedUser.password)
 
     if(!checkerPassword) {
-     return res.json({
-        message: "Invalid password"
-      })
+     throw BaseError.BadRequest("Invalid password")
     }
 
     if(foundedUser.verify === true) {
@@ -135,17 +125,26 @@ const login = async (req, res, next) => {
         }
       })
     }else{
-     return res.json({
-        message: "You were not verified"
-      })
+      throw BaseError.BadRequest("You were not verfied")
     }
   }catch(error) {
     next(error)
   }
 }
 
+
+// const logOut = async (req, res, next) => {
+//   try{
+//     const {refreshToken} = req.cookies
+//     res.clearCookie(refreshToken)
+//   }catch(error) {
+//     next(error)
+//   }
+// }
+
 module.exports = {
   register,
   verify,
-  login
+  login,
+  // logOut
 }

@@ -14,9 +14,7 @@ const getOneAuthor = async (req, res, next) => {
   try {
     const author = await Authors.findById(req.params.id)
     if (!author) {
-      res.json({
-        message: "Author not found"
-      })
+      throw BaseError.BadRequest("Author not found")
     }
     res.json(author);
   } catch (err) {

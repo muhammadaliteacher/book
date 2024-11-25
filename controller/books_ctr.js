@@ -14,9 +14,7 @@ const getOneBook = async (req, res, next) => {
   try {
     const book = await BooksScheams.findById(req.params.id)
     if (!book) {
-      res.json({
-        message: "Not found"
-      })
+      throw BaseError.BadRequest("Book not found")
     }
     res.json(book);
   } catch (err) {
@@ -41,10 +39,11 @@ const search = async (req, res, next) => {
 
 const addBook = async (req, res, next) => {
   try {
-    const { title, author, rate, page, publish, genre, publishHome, description, author_info } = req.body;
-
-    await BooksScheams.create({ title, author, rate, page, publish, genre, publishHome, description, author_info });
-
+    const { title, author, rate, page, publish, genre, publishHome, description, author_info, image, era } = req.body;
+    
+    await BooksScheams.create({ title, author, rate, page, publish, genre, publishHome, description, author_info, image, era  });
+    
+    console.log(req.user)
     res.json({
       message: "Added new book",
     });
@@ -61,9 +60,7 @@ const updateBook = async (req, res, next) => {
     const foundedBook = await BooksScheams.findById(id)
 
     if (!foundedBook) {
-      res.json({
-        message: "Book not found"
-      })
+      throw BaseError.BadRequest("Book not found")
     }
 
     let result = await BooksScheams.findByIdAndUpdate(id,
@@ -86,9 +83,7 @@ const deleteBook = async (req, res, next) => {
     const foundedBook = await BooksScheams.findById(id)
 
     if (!foundedBook) {
-      res.json({
-        message: "Book not found"
-      })
+      throw BaseError.BadRequest("Book not found")
     }
 
     await BooksScheams.findByIdAndDelete(id);
